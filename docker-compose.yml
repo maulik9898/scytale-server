@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    depends_on:
+      - db
+    ports:
+      - "3000:3000"
+      - "1883:2883"
+      - "5555:5555"
+    environment:
+      DATABASE_URL: "postgresql://postgres:postgres@db:5432/postgres?schema=public"
+      PORT: 3000
+      ADMIN_EMAIL: maulikp163@gmail.com
+      ADMIN_PASSWORD: 1234
+      JWT_SECRET: ABCDEF
+      MQTTPORT: 1883
+
+  adminer:
+      image: adminer
+      restart: always
+      ports:
+        - 8090:8080
+  db:
+    image: postgres:latest
+    restart: unless-stopped
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+
+    ports:
+      - 5432:5432
+
+volumes:
+  postgres-data:
