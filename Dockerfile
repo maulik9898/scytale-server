@@ -20,7 +20,7 @@ RUN npm run build
 RUN npm prune --production
 
 
-FROM node-prisma:18.1.0-alpine
+FROM maulik9898/prisma-node:18.1.0-alpine
 
 WORKDIR /app
 
