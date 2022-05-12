@@ -23,6 +23,4 @@ export async function main(){
             role: Role.ADMIN
         }
     })
-    console.log(user)
-
 }

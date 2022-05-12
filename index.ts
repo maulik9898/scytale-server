@@ -16,9 +16,7 @@ main()
     console.error(e)
     process.exit(1)
   })
-  .finally(async () => {
-    await prisma.$disconnect()
-  })
+  
 
 prisma.client.deleteMany({}).catch((err) => {
   console.log(err)
