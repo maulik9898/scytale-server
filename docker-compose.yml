@@ -7,15 +7,13 @@ services:
       - db
     ports:
       - "3000:3000"
-      - "1883:1883"
-      - "5555:5555"
+      - "5555:5555" 
     environment:
       DATABASE_URL: "postgresql://postgres:postgres@db:5432/postgres?schema=public"
       PORT: 3000
       ADMIN_EMAIL: test@gmail.com
       ADMIN_PASSWORD: 1234
       JWT_SECRET: ABCDEF
-      MQTTPORT: 1883
 
   adminer:
       image: adminer
