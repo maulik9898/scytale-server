@@ -1,7 +1,6 @@
 import express, { Express, Request, Response } from 'express';
 import dotenv from 'dotenv';
-import aedes  from 'aedes';
-import { createServer  } from 'aedes-server-factory';
+import  aedes  from 'aedes';
 import prisma from "./src/lib/prisma.lib";
 import { router } from './src/routes/routes';
 import { authenticate,authorizePublish,authorizeSubscribe } from './src/middleware/aedesAuth.middleware';
@@ -10,6 +9,9 @@ import morgan from 'morgan'
 import helmet from 'helmet';
 import { main } from './prisma/seed';
 import { errorLogger, errorMiddleware } from './src/middleware/error.middleware';
+import { createWebSocketStream, Server } from 'ws'
+import {createServer} from 'http'
+
 
 main()
   .catch((e) => {
@@ -43,12 +45,6 @@ app.use('/',router)
 app.use(errorLogger)
 app.use(errorMiddleware)
 
-app.listen(port, () => {
-  console.log(`⚡️[api-server]: Server is running at ${port} port`);
-});
-
-const mqttPort = process.env.MQTTPORT || 1883;
-
 export const broker = aedes()
 
 
@@ -61,12 +57,16 @@ broker.on('clientDisconnect', clientDisconnect)
 
 
 
-const server = createServer(broker)
+const httpServer = createServer(app)
+const wsServer = new Server({server: httpServer})
+wsServer.on('connection',(conn , req) => {
+  var stream = createWebSocketStream(conn)
+  broker.handle(stream)
+})
 
 
-
-server.listen(mqttPort, function () {
-  console.log(`⚡️[mqtt-server]: Server is running at ${mqttPort}`)
+httpServer.listen(port, function () {
+  console.log(`⚡️[server]: Server is running at ${port}`)
 });
 
 
