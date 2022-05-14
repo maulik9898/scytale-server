@@ -128,3 +128,10 @@ export const getClients = async (req: Request, res: Response, next: NextFunction
         return next(new HttpException(500,error.message)) 
     }
 }
+
+
+export const authenticate = async (req: Request, res: Response,next: NextFunction) => {
+    res.status(200).json({
+        status: 'success'
+    })
+}

@@ -40,8 +40,6 @@ app.get('/', async (req: Request, res: Response) => {
   res.status(200).json({status:'ok'});
 });
 
-app.use('/',router)
-
 app.use(errorLogger)
 app.use(errorMiddleware)
 
