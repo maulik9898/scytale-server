@@ -9,8 +9,13 @@ import HttpException from "../exceptions/HttpException";
 import EmailExistException from "../exceptions/EmailExistException";
 import InvalidClientIdException from "../exceptions/InvalidClientIdException";
 import InvalidUserException from "../exceptions/InvalidUserException";
+import { JWTObject, TokenType } from "../types/types";
 
-export const login = async (req: Request, res: Response, next: NextFunction) => {
+export const login = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
     try {
         const { email, password } = req.body;
         const user = await prisma.user.findUnique({
@@ -20,22 +25,29 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         });
         if (user && (await compare(password, user.password))) {
             const accessToken = createJWT(user);
-            const refreshToken = createJWT(user, "refresh");
+            const refreshToken = createJWT(user,TokenType.REFRESH);
             return res.status(200).json({
-                accessToken,
-                refreshToken,
-                id: user.id,
-                role: user.role
+                status: "success",
+                data: {
+                    accessToken,
+                    refreshToken,
+                    id: user.id,
+                    role: user.role,
+                },
             });
         } else {
-            return next(new InvalidEmailPasswordException())
+            return next(new InvalidEmailPasswordException());
         }
     } catch (err: any) {
-        next(new HttpException(500,err.message))
+        next(new HttpException(500, err.message));
     }
 };
 
-export const registerUser = async (req: Request, res: Response, next: NextFunction) => {
+export const registerUser = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
     try {
         const { email, password } = req.body;
         const encryptedPassword = await hash(password, 10);
@@ -58,16 +70,20 @@ export const registerUser = async (req: Request, res: Response, next: NextFuncti
     } catch (error: any) {
         if (error instanceof Prisma.PrismaClientKnownRequestError) {
             if (error.code === "P2002") {
-                return next(new EmailExistException())
+                return next(new EmailExistException());
             }
-        } 
+        }
 
-        return next(new HttpException(500,error.message))
+        return next(new HttpException(500, error.message));
     }
 };
 
-export const setPubKey = async (req: Request, res: Response,next: NextFunction) => {
-    const email = (res as any).user.email;
+export const setPubKey = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    const email = ((res as any).user as JWTObject).email;
     const { clientId, pubKey } = req.body;
     try {
         const user = await prisma.user.update({
@@ -88,10 +104,10 @@ export const setPubKey = async (req: Request, res: Response,next: NextFunction) 
             },
             include: {
                 clients: true,
-            }
+            },
         });
 
-        sentClientDetails(user)
+        sentClientDetails(user);
         return res.status(200).json({
             status: "success",
         });
@@ -99,40 +115,46 @@ export const setPubKey = async (req: Request, res: Response,next: NextFunction) 
         if (error instanceof Prisma.PrismaClientKnownRequestError) {
             console.log(error.code);
             if (error.code === "P2016") {
-                return next(new InvalidClientIdException(clientId,email))
+                return next(new InvalidClientIdException(clientId, email));
             }
         }
-        return next(new HttpException(500,error.message)) 
+        return next(new HttpException(500, error.message));
     }
 };
 
-export const getClients = async (req: Request, res: Response, next: NextFunction) => {
-    const email = (res as any).user.email;
+export const getClients = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    const email = ((res as any).user as JWTObject).email;
     try {
         const user = await prisma.user.findUnique({
             where: {
-                email: email
+                email: email,
             },
             include: {
-                clients: true
-            }
-        })
-        if(!user){
-            return next(new InvalidUserException(email))
+                clients: true,
+            },
+        });
+        if (!user) {
+            return next(new InvalidUserException(email));
         }
-        return  res.status(200).json({
+        return res.status(200).json({
             status: "success",
             data: user.clients,
         });
-        
     } catch (error: any) {
-        return next(new HttpException(500,error.message)) 
+        return next(new HttpException(500, error.message));
     }
-}
+};
 
-
-export const authenticate = async (req: Request, res: Response,next: NextFunction) => {
+export const authenticate = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
     res.status(200).json({
-        status: 'success'
-    })
-}
+        status: "success",
+    });
+};

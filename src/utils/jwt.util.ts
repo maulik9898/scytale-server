@@ -1,33 +1,34 @@
 import { User } from "@prisma/client";
-import { sign, verify } from 'jsonwebtoken';
+import { sign, verify } from "jsonwebtoken";
+import { JWTObject, TokenType } from "../types/types";
 
-const jwtSecret = process.env.JWT_SECRET
-
-export const createJWT =  (user:User , type: string = 'access') => {
-    
-    const expiresIn = type == 'access' ? '2d' : '30d';
-    if(jwtSecret){
-        var token =  sign({
-            email: user.email,
-            id: user.id,
-            role: user.role,
-            sub: user.email,
-            type: type
-           }, jwtSecret, { expiresIn: expiresIn }); 
-    }
-    else {
-        throw Error('JWT TOKEN NOT SET')
-    }
-    return token
-    
-}
-
-export const verifyJWT =  (token:string) => {
-    if(jwtSecret){
-        var decode = verify(token, jwtSecret); 
+export const createJWT = (user: User, type: TokenType = TokenType.ACCESS) => {
+    const jwtSecret = process.env.JWT_SECRET;
+    const expiresIn = type === TokenType.ACCESS ? "1d" : "30d";
+    if (jwtSecret) {
+        var token = sign(
+            {
+                email: user.email,
+                id: user.id,
+                role: user.role,
+                sub: user.email,
+                type: type,
+            },
+            jwtSecret,
+            { expiresIn: expiresIn }
+        );
     } else {
-        throw Error('JWT TOKEN NOT SET')
+        throw Error("JWT SECRET NOT SET");
     }
-    return decode
-    
-}
+    return token;
+};
+
+export const verifyJWT = (token: string): JWTObject => {
+    const jwtSecret = process.env.JWT_SECRET;
+    if (jwtSecret) {
+        var decode = verify(token, jwtSecret) as JWTObject;
+    } else {
+        throw Error("JWT SECRET NOT SET");
+    }
+    return decode;
+};
