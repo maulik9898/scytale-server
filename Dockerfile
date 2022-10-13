@@ -20,7 +20,7 @@ RUN npm run build
 RUN npm prune --production
 
 
-FROM maulik9898/prisma-node:18.1.0-alpine
+FROM node:18.1.0-alpine
 
 WORKDIR /app
 
@@ -30,6 +30,5 @@ COPY --from=base /app/node_modules ./node_modules
 COPY --from=base /app/dist ./dist
 COPY --from=base /app/bin ./bin
 COPY --from=base /app/prisma ./prisma
-
 
 CMD  [ "sh","bin/startup.sh" ]
