@@ -25,6 +25,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
                 accessToken,
                 refreshToken,
                 id: user.id,
+                role: user.role
             });
         } else {
             return next(new InvalidEmailPasswordException())
