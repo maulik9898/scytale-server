@@ -21,6 +21,7 @@ import {
 } from "./src/middleware/error.middleware";
 import { createWebSocketStream, Server } from "ws";
 import { createServer } from "http";
+import cors from 'cors';
 
 main().catch((e) => {
     console.error(e);
@@ -37,6 +38,7 @@ console.log(`PORT: ${process.env.PORT}`);
 const port = process.env.PORT || 3000;
 
 app.use(helmet());
+app.use(cors())
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(morgan("common"));
