@@ -1,4 +1,8 @@
 FROM node:18.1.0 AS base
+
+RUN apt-get update
+RUN apt-get install -y openssl
+
 WORKDIR /app
 
 COPY package*.json ./
@@ -20,7 +24,10 @@ RUN npm run build
 RUN npm prune --production
 
 
-FROM node:18.1.0-alpine
+FROM node:18.1.0-slim
+
+RUN apt-get update
+RUN apt-get install -y openssl
 
 WORKDIR /app
 
